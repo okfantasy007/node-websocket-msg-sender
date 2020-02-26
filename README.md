@@ -336,7 +336,7 @@ router.post('/delete', function (req, res, next) {
 	});
 });
 ```
-其中有一段代码是，在成功删除账号之后去请求`myapp`的接口`/ws/deleteAccountToUpdateOnline`，调用`node-websocket-msg-sender`的接口服务。
+其中有一段代码是，在成功删除账号之后去请求`node-websocket-msg-sender`的接口`/ws/deleteAccountToUpdateOnline`。
 
 ```javascript
 router.post('/deleteAccountToUpdateOnline', function (req, res, next) {
@@ -370,5 +370,95 @@ function deleteToRedirectLogin(self, uid) {
 	})
 }
 ```
+## 部署
+该项目结合自己搭建的jenkins实现自动化部署。
 
+### Build阶段
+```shell
+node -v
+npm -v
+#安装依赖包
+npm install
+#如果node-websocket-msg-sender.tar.gz存在，则删除；如果node-websocket-msg-sender.tar.gz不存在，则不进行删除操作
+rm -rf node-websocket-msg-sender.tar.gz
+#将当前workspace目录下的所有文件压缩到node-websocket-msg-sender.tar.gz
+tar -czf node-websocket-msg-sender.tar.gz *
+```
+### Post-Build阶段
+```shell
+#!/bin/bash
+echo "=====deploy node-websocket-msg-sender start====="
 
+#获取系统当前时间
+t=$(date +%y%m%d_%H%M%S)
+
+#打开后端文件node-websocket-msg-sender所在目录
+cd /home/liuyuanbing/msg
+
+#备份当前myapp文件夹，备份后的文件夹以"myapp_ + 当前时间戳"的形式命名
+cp -r node-websocket-msg-sender node-websocket-msg-sender_$t
+
+#清理myapp的备份文件夹，最多只保留最近的两个备份文件夹
+sh /home/liuyuanbing/shell/keep_most_2_node-websocket-msg-sender_copy_by_for.sh
+
+#清空服务器当前目录下myapp文件夹中的内容
+rm -rf ./node-websocket-msg-sender/*
+
+#将myapp.tar.gz解压到服务器当前目录下的myapp文件夹中
+tar vxf node-websocket-msg-sender.tar.gz -C ./node-websocket-msg-sender
+
+#删除服务器当前目录下的myapp.tar.gz
+rm -rf node-websocket-msg-sender.tar.gz
+
+#pm2路径变量
+pm2=/root/node-v8.0.0-linux-x64/bin/pm2
+
+#www路径变量
+www=/home/liuyuanbing/msg/node-websocket-msg-sender/bin/www
+
+#pm2版本
+echo "pm2 --version："
+$pm2 --version
+
+#获取当前pm2任务列表
+echo "current pm2 list："
+$pm2 list
+
+#停止名字为myapp的pm2任务
+$pm2 stop msg
+
+#删除名字为myapp的pm2任务
+$pm2 delete msg
+
+#创建新的名字为myapp的pm2任务
+$pm2 start $www -i 0 --name "msg" --log-date-format="YYYY-MM-DD HH:mm Z"
+
+#重新获取pm2任务列表
+echo "updated pm2 list："
+$pm2 list
+
+echo "=====deploy node-websocket-msg-sender end====="
+```
+### nginx
+```shell
+#websocket	
+location ^~ /socket.io/ {
+	# 转发websocket需要的设置 start
+	proxy_pass http://127.0.0.1:8082;
+	proxy_set_header Host $host;
+	proxy_http_version 1.1; 
+	proxy_set_header Upgrade $http_upgrade;
+	proxy_set_header Connection "upgrade";
+	proxy_set_header X-Real-IP $remote_addr;
+	proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+	proxy_connect_timeout 60;
+	proxy_read_timeout 600;
+	proxy_send_timeout 600;
+	# 转发websocket需要的设置 end
+}
+
+location ^~ /ws/ {
+	proxy_pass http://127.0.0.1:8082;
+}
+#websocket
+```
