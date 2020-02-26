@@ -463,3 +463,4 @@ location ^~ /ws/ {
 #websocket
 ```
 此处要特别注意的是，websocket提供的服务接口是以`socket.io`为特征的，因此需要针对`socket.io`进行websocket协议升级。
+![浏览器websocket请求](https://github.com/okfantasy007/node-websocket-msg-sender/blob/master/image/Snipaste_2020-02-26_20-30-26.png "浏览器websocket请求")
