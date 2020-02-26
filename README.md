@@ -462,3 +462,4 @@ location ^~ /ws/ {
 }
 #websocket
 ```
+此处要特别注意的是，websocket提供的服务接口是以`socket.io`为特征的，因此需要针对`socket.io`进行websocket协议升级。
