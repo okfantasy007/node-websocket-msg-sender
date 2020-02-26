@@ -60,7 +60,7 @@ ioSvc.serverBroadcastMsg = function (data) {
 	// this.io.sockets.emit('message', data);
 };
 ```
-此处，我对原先的广播消息的写法进行了改造。因为按照`this.io.sockets.emit('message', data);`这种原始方式会遇到一个问题，即一个客户端可能会有多个连接，广播信息的时候，一个客户端可能会受到多条重复的消息。为此，我对该方法进行了改造，改造思路如下：
+此处，我对原先的广播消息的写法进行了改造。因为按照`this.io.sockets.emit('message', data);`这种原始方式会遇到一个问题，即一个客户端可能会有多个连接，广播信息的时候，一个客户端可能会收到多条重复的消息。为此，我对该方法进行了改造，改造思路如下：
 
 - 首先，通过redis获取到所有已登录的会话信息（以value的形式存储在redis中），这步流程封装到`fetchUserSocketIdArr`中了。
 
