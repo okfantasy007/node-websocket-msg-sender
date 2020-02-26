@@ -351,13 +351,13 @@ router.post('/deleteAccountToUpdateOnline', function (req, res, next) {
 ```
 在`/ws/deleteAccountToUpdateOnline`的接口处理逻辑中，系统再次调用了`ioSvc.updateOnlieCount`去具体处理，并向其传递了三个参数`deleteFlag`、`uid`、`userName`，为了就是与上述另外两种时机区分开来。
 
-我们把视线再投入到函数`ioSvc.updateOnlieCount`中来，发现代码中用了一个`if...else`语句对第3种时机与第1、2种时机进行了区别处理。
+我们把视线再投入到`ioSvc.updateOnlieCount`中来，发现代码中用了一个`if...else`语句对第3种时机与第1、2种时机进行了区别处理。
 
 第3种时机，我们在删除掉对应的redis key之后，做了两步处理，即
 1. updateOnlieCountFunc
 2. deleteToRedirectLogin
 
-其中，`deleteToRedirectLogin`这一步就是在干“让被删除的已登录的普通账号对应的客户端重定向到登录页”这件事情。
+其中，`deleteToRedirectLogin`这一步就是在干【让被删除的已登录的普通账号对应的客户端重定向到登录页】这件事情。
 
 ```javascript
 function deleteToRedirectLogin(self, uid) {
