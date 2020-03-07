@@ -215,7 +215,7 @@ function updateOnlieCountFunc(self) {
 - 从key列表中分离出（key的格式为`sess:${用户名}/${时间戳}`）所有已登录的用户名
 - 通过广播`update_online_count`指令的方式，将最新的在线用户列表和用户数量信息推送给所有已登录的客户端
 
-#### 拉取在线用户信息的时机
+#### 更新在线用户信息的时机
 
 1. 新用户登录
 2. 已登录用户退出登录
@@ -336,7 +336,7 @@ router.post('/delete', function (req, res, next) {
 	});
 });
 ```
-其中有一段代码是，在成功删除账号之后去请求`node-websocket-msg-sender`的接口`/ws/deleteAccountToUpdateOnline`。
+其中有一段代码是，在成功删除账号之后去请求`todolist-msg`的接口`/ws/deleteAccountToUpdateOnline`。
 
 ```javascript
 router.post('/deleteAccountToUpdateOnline', function (req, res, next) {
